@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Budget</title>
+    <!-- This is an SEO Change -->
+    <link rel="canonical" href="index.html">
+    <meta name="description" content="A free personal budger app">
+    <meta name="keywords" content="app free budget finance">
+    <!-- This is an SEO Change -->
+    <meta name="author" content="Fabio Nolasco">
+    <!-- This is an SEO Change -->
+    <meta name="robots" content="index, archive"/>
+    <link rel="stylesheet" href="reset.css">
+    <link rel="stylesheet" href="main.css">
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <style>
+        .chart-container {
+            width: 200px;
+            height: 200px;
+            margin: auto;
+        }
+        svg {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<a href="#main" class="skip">Skip to content</a>
+
+    <nav>
+        <ul>
+            <!-- This is an A11y Change -->
+            <li><a href="/" aria-label="Go to the Home Page">Home</a></li>
+            <!-- This is an A11y Change -->
+            <li><a href="/about.html" aria-label="Learn more about the app">About</a></li>
+            <!-- This is an A11y Change -->
+            <li><a href="/login.html" aria-label="Go to Login Page">Login</a></li>
+            <li><a href="https://google.com">Google</a></li>
+        </ul>
+    </nav>
+    
+    <div class="hero">
+        <h1>Personal Budget</h1>
+        <h2>A personal-budget management app</h2>
+    </div>
+
+    <main class="center" id="main">
+
+        <div class="page-area">
+            <!-- This is a Semantic HTML Change -->
+            <details>
+                <summary><strong>Stay on track</strong></summary>
+                <p>
+                    Do you know where you are spending your money? If you really stop to track it down,
+                    you would get surprised! Proper budget management depends on real data... and this
+                    app will help you with that!
+                </p>
+            </details>
+    
+            <article>
+                <h1>Alerts</h1>
+                <p>
+                    <!-- This is a Semantic HTML Change -->
+                    What if your clothing budget ended? You will get an alert. The goal is to <em>never</em> go over the budget.
+                </p>
+            </article>
+    
+            <article>
+                <h1>Results</h1>
+                <p>
+                    People who stick to a financial plan, budgeting every expense, get out of debt faster!
+                    Also, they to live happier lives... since they expend without guilt or fear... 
+                    because they know it is all good and accounted for.
+                </p>
+            </article>
+    
+            <article>
+                <h1>Free</h1>
+                <p>
+                    <!-- This is a Semantic HTML Change -->
+                    This app is <strong>free!!!</strong> And you are the only one holding your data!
+                </p>
+            </article>
+    
+            <article>
+                <h1>Stay on track</h1>
+                <p>
+                    Do you know <em>where</em> you are spending your money? If you really stop to track it down,
+                    you would get surprised! Proper budget management depends on real data... and this
+                    app will help you with that!
+                </p>
+            </article>
+    
+            <article>
+                <h1>Alerts</h1>
+                <p>
+                    What if your clothing budget ended? You will get an alert. The goal is to never go over the budget.
+                </p>
+            </article>
+    
+            <article>
+                <h1>Results</h1>
+                <p>
+                    People who stick to a financial plan, budgeting every expense, get out of debt faster!
+                    Also, they to live happier lives... since they expend without guilt or fear... 
+                    because they know it is all good and accounted for.
+                </p>
+            </article>
+    
+            <article>
+                <h1>Chart</h1>
+                <p>
+                    <canvas id="myChart" width="400" height="400"></canvas>
+                </p>
+            </article>
+
+            <article>
+                <h1>Chart2</h1>
+                <div class="chart-container">
+                    <svg id="d3Chart"></svg>
+                </div>
+            </article>
+
+        </div>
+
+    </main>
+
+    <footer class="bottom">
+        <div class="center">
+            All rights reserved &copy; Fabio Nolasco
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.20.0/axios.min.js" integrity="sha512-quHCp3WbBNkwLfYUMd+KwBAgpVukJu5MncuQaWXgCrfgcxCJAq/fo+oqrRKOj+UKEmyMCG3tb8RB63W+EmrOBg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js" integrity="sha512-s+xg36jbIujB2S2VKfpGmlC3T5V2TF3lY48DX7u2r9XzGzgPsa6wTpOQA7J9iffvdeBN0q9tKzRxVxw1JviZPg==" crossorigin="anonymous"></script>
+
+    <script>
+        var dataSource = {
+            datasets: [
+                {
+                    data: [],  // Budget amounts
+                    backgroundColor: []  // Corresponding colors for each budget category
+                }
+            ],
+            labels: []  // Budget category names (titles)
+        };
+    
+        function createChart() {
+            var ctx = document.getElementById('myChart').getContext('2d');
+            var myPieChart = new Chart(ctx, {
+                type: 'pie',
+                data: dataSource
+            });
+        }
+    
+        function getBudget() {
+            axios.get('http://localhost:3000/budget')
+                .then(function (res) {
+                    console.log(res.data);
+                    
+                    dataSource.datasets[0].data = [];
+                    dataSource.labels = [];
+                    dataSource.datasets[0].backgroundColor = [];
+
+                    for (var i = 0; i < res.data.length; i++) {
+                        // Convert 'budget' from string to a number
+                        dataSource.datasets[0].data.push(parseInt(res.data[i].budget, 10)); 
+                        dataSource.labels.push(res.data[i].title); 
+
+                        // Adding color to array
+                        dataSource.datasets[0].backgroundColor.push(res.data[i].color);
+                    }
+                    createChart();  
+                })
+                .catch(function (error) {
+                    console.error("Error fetching budget data", error);
+                });
+        }
+    
+        getBudget();
+    
+        function createD3Chart(data) {
+            var svg = d3.select("#d3Chart"),
+                width = 200,
+                height = 200,
+                radius = Math.min(width, height) / 2;
+    
+            var pie = d3.layout.pie().sort(null).value(function(d) { return Number(d.budget); });  // Convert 'budget' to number
+    
+            var arc = d3.svg.arc().outerRadius(radius - 10).innerRadius(0);
+    
+            var color = d3.scale.category20();
+    
+            svg.attr("width", width).attr("height", height)
+                .append("g")
+                .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+    
+            var g = svg.select("g")
+                .selectAll(".arc")
+                .data(pie(data))
+                .enter().append("g")
+                .attr("class", "arc");
+    
+            g.append("path")
+                .attr("d", arc)
+                .style("fill", function(d) { return d.data.color; });  // Use color from MongoDB data
+    
+            g.append("text")
+                .attr("transform", function(d) { return "translate(" + arc.centroid(d) + ")"; })
+                .attr("dy", ".35em")
+                .style("text-anchor", "middle")
+                .text(function(d) { return d.data.title; });
+        }
+    
+        function fetchD3Data() {
+            axios.get('http://localhost:3000/budget')
+                .then(function (res) {
+                    // Pass the data array directly to the D3 chart creation function
+                    createD3Chart(res.data);  
+                })
+                .catch(function (error) {
+                    console.error("Error fetching D3 data", error);
+                });
+        }
+    
+        fetchD3Data();
+    </script>
+    
+
+</body>
+</html>
